@@ -28,7 +28,17 @@ class Plugin {
    * @implements init
    */
   public static function init() {
+    add_filter('query_vars', __CLASS__ . '::query_vars');
     add_filter('rewrite_rules_array', __CLASS__ . '::rewrite_rules_array', 100);
+    add_filter('request', __CLASS__ . '::request', 1);
+  }
+
+  /**
+   * @implements query_vars
+   */
+  public static function query_vars(array $vars) {
+    $vars[] = 'product_cat_and_post_name';
+    return $vars;
   }
 
   /**
@@ -36,16 +46,36 @@ class Plugin {
    */
   public static function rewrite_rules_array(array $rules) {
     $rules = [
-      // Category pages (paging).
-      'shop/([^/]*?)/page/([0-9]{1,})/?$' => 'index.php?product_cat=$matches[1]&paged=$matches[2]',
-      // Subcategory pages.
-      // @todo Add paging.
-      // @todo Add support for any amount of nested categories instead of two levels.
-      'shop/([^/]*?)/([^/]*?)/?$' => 'index.php?product_cat=$matches[2]',
-      // Category pages.
-      'shop/([^/]*?)/?$' => 'index.php?product_cat=$matches[1]',
+      // Same as default rewrite rule for product categories with default config
+      // '%product_cat%/$postname%' for product permalinks, but additionally
+      // records the full category/product-name path, so it can be used as a
+      // fallback in request().
+      'shop((?:/[^/]+?)*/([^/]+?))(/page/([0-9]+))?/?$' => 'index.php?product_cat=$matches[2]&paged=$matches[4]&product_cat_and_post_name=$matches[1]',
     ] + $rules;
     return $rules;
+  }
+
+  /**
+   * Rewrites the request to query a product page if the requested product category does not exist.
+   *
+   * @implements request
+   */
+  public static function request(array $query_vars) {
+    if (isset($query_vars['product_cat']) && $query_vars['product_cat'] !== '' && !term_exists($query_vars['product_cat'], 'product_cat')) {
+      // The regular rewrite rule for products is:
+      //   shop/(.+?)/([^/]+)(?:/([0-9]+))?/?$	index.php?product_cat=$matches[1]&product=$matches[2]&page=$matches[3]	product
+      $query_vars['post_type'] = 'product';
+      $query_vars['product'] = $query_vars['product_cat'];
+      $query_vars['name'] = $query_vars['product'];
+      $query_vars['product_cat'] = trim(strtr($query_vars['product_cat_and_post_name'], [$query_vars['product_cat'] => '']), '/');
+
+      // Also rewrite the paging parameter from categories to posts/pages.
+      if (isset($query_vars['paged'])) {
+        $query_vars['page'] = $query_vars['paged'];
+        unset($query_vars['paged']);
+      }
+    }
+    return $query_vars;
   }
 
   /**
