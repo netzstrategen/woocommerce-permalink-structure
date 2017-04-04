@@ -50,7 +50,7 @@ class Plugin {
       // '%product_cat%/$postname%' for product permalinks, but additionally
       // records the full category/product-name path, so it can be used as a
       // fallback in request().
-      'shop((?:/[^/]+?)*/([^/]+?))(/page/([0-9]+))?/?$' => 'index.php?product_cat=$matches[2]&paged=$matches[4]&product_cat_and_post_name=$matches[1]',
+      'shop((?:/[^/]+?)*?/([^/]+?))(/page/([0-9]+))?/?$' => 'index.php?product_cat=$matches[2]&paged=$matches[4]&product_cat_and_post_name=$matches[1]',
     ] + $rules;
     return $rules;
   }
