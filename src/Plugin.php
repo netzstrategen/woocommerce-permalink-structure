@@ -29,7 +29,7 @@ class Plugin {
    */
   public static function init() {
     add_filter('query_vars', __CLASS__ . '::query_vars');
-    add_filter('rewrite_rules_array', __CLASS__ . '::rewrite_rules_array', 100);
+    add_filter('product_rewrite_rules', __CLASS__ . '::product_rewrite_rules', 100);
     add_filter('request', __CLASS__ . '::request', 1);
   }
 
@@ -42,9 +42,9 @@ class Plugin {
   }
 
   /**
-   * @implements rewrite_rules_array
+   * @implements product_rewrite_rules
    */
-  public static function rewrite_rules_array(array $rules) {
+  public static function product_rewrite_rules(array $rules) {
     $rules = [
       // Same as default rewrite rule for product categories with default config
       // '%product_cat%/$postname%' for product permalinks, but additionally
