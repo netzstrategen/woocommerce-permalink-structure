@@ -29,6 +29,8 @@ class Plugin {
    */
   public static function init() {
     add_filter('query_vars', __CLASS__ . '::query_vars');
+    // Add rewrite rules at the beginning of the product rules to not mistakenly
+    // match the product taxonomy ones which are defined upfront.
     add_filter('product_rewrite_rules', __CLASS__ . '::product_rewrite_rules', 100);
     add_filter('request', __CLASS__ . '::request', 1);
   }
