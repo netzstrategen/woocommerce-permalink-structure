@@ -3,7 +3,7 @@
 /*
   Plugin Name: WooCommerce Permalink Structure
   Plugin URI: http://wordpress.org/plugins/woocommerce-permalink-structure/
-  Version: 1.0.3
+  Version: 1.1.0
   Text Domain: woocommerce-permalink-structure
   Description: Allows WooCommerce products to have the same permalink path prefix as product categories and the shop base page; i.e., '/shop/category/subcategory/product-name'. Adjusts internal WordPress rewrite rule structure; not necessarily compatible with all plugins and shop configurations.
   Author: Daniel F. Kudwien (sun)
