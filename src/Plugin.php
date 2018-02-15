@@ -33,6 +33,8 @@ class Plugin {
     // match the product taxonomy ones which are defined upfront.
     add_filter('product_rewrite_rules', __CLASS__ . '::product_rewrite_rules', 100);
     add_filter('request', __CLASS__ . '::request', 1);
+    // Removes trailing slash from password reset and other links to avoid redirects.
+    add_filter('woocommerce_get_endpoint_url', __NAMESPACE__ . '\WooCommerce::woocommerce_get_endpoint_url', 10, 4);
   }
 
   /**
@@ -78,6 +80,21 @@ class Plugin {
       }
     }
     return $query_vars;
+  }
+
+  /**
+   * Removes trailing slash from links to WooCommerce password reset and other pages.
+   *
+   * WooCommerce appends a trailing slash to the password reset and other special
+   * pages, which causes an unnecesary redirect for users.
+   *
+   * @implements woocommerce_get_endpoint_url
+   */
+  public static function woocommerce_get_endpoint_url($url, $endpoint, $value, $permalink) {
+    if (!$value) {
+      $url = untrailingslashit($url);
+    }
+    return $url;
   }
 
   /**
