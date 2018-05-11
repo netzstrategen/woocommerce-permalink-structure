@@ -55,7 +55,7 @@ class Plugin {
       // '%product_cat%/$postname%' for product permalinks, but additionally
       // records the full category/product-name path, so it can be used as a
       // fallback in request().
-      'shop((?:/[^/]+?)*?/(?!checkout)([^/]+?))(/page/([0-9]+))?/?$' => 'index.php?product_cat=$matches[2]&paged=$matches[4]&product_cat_and_post_name=$matches[1]',
+      'shop((?:/[^/]+?)*?/([^/]+?))(/page/([0-9]+))?/?$' => 'index.php?product_cat=$matches[2]&paged=$matches[4]&product_cat_and_post_name=$matches[1]',
     ] + $rules;
     return $rules;
   }
@@ -67,6 +67,10 @@ class Plugin {
    */
   public static function request(array $query_vars) {
     if (isset($query_vars['product_cat']) && $query_vars['product_cat'] !== '' && !term_exists($query_vars['product_cat'], 'product_cat')) {
+      $pagename = 'shop/' . ltrim($query_vars['product_cat_and_post_name'], '/');
+       if ($post = get_page_by_path($pagename)) {
+        return ['p' => $post->ID];
+      }
       // The regular rewrite rule for products is:
       //   shop/(.+?)/([^/]+)(?:/([0-9]+))?/?$	index.php?product_cat=$matches[1]&product=$matches[2]&page=$matches[3]	product
       $query_vars['post_type'] = 'product';
