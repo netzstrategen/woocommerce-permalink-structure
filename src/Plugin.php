@@ -55,7 +55,7 @@ class Plugin {
       // '%product_cat%/$postname%' for product permalinks, but additionally
       // records the full category/product-name path, so it can be used as a
       // fallback in request().
-      'shop((?:/[^/]+?)*?/([^/]+?))(/page/([0-9]+))?/?$' => 'index.php?product_cat=$matches[2]&paged=$matches[4]&product_cat_and_post_name=$matches[1]',
+      static::getCategoryBase() . '((?:/[^/]+?)*?/([^/]+?))(/page/([0-9]+))?/?$' => 'index.php?product_cat=$matches[2]&paged=$matches[4]&product_cat_and_post_name=$matches[1]',
     ] + $rules;
     return $rules;
   }
@@ -67,9 +67,9 @@ class Plugin {
    */
   public static function request(array $query_vars) {
     if (isset($query_vars['product_cat']) && $query_vars['product_cat'] !== '' && !term_exists($query_vars['product_cat'], 'product_cat')) {
-      $pagename = 'shop/' . ltrim($query_vars['product_cat_and_post_name'], '/');
-       if ($post = get_page_by_path($pagename)) {
-        return ['p' => $post->ID];
+      $pagename = static::getCategoryBase() . '/' . ltrim($query_vars['product_cat_and_post_name'], '/');
+      if ($post = get_page_by_path($pagename)) {
+        return ['page_id' => $post->ID];
       }
       // The regular rewrite rule for products is:
       //   shop/(.+?)/([^/]+)(?:/([0-9]+))?/?$	index.php?product_cat=$matches[1]&product=$matches[2]&page=$matches[3]	product
@@ -100,6 +100,16 @@ class Plugin {
       $url = untrailingslashit($url);
     }
     return $url;
+  }
+
+  /*
+   * Returns the WooCommerce category permalink base.
+   *
+   * @return string
+   */
+  public static function getCategoryBase(): string {
+    $permalinks = (array) get_option('woocommerce_permalinks');
+    return $permalinks['category_base'] ?? 'shop';
   }
 
   /**
