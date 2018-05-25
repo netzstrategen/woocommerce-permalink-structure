@@ -67,6 +67,7 @@ class Plugin {
    */
   public static function request(array $query_vars) {
     if (isset($query_vars['product_cat']) && $query_vars['product_cat'] !== '' && !term_exists($query_vars['product_cat'], 'product_cat')) {
+      // If the requested path is a child of the shop page query the page instead of a category or product.
       $pagename = static::getCategoryBase() . '/' . ltrim($query_vars['product_cat_and_post_name'], '/');
       if ($post = get_page_by_path($pagename)) {
         return ['page_id' => $post->ID];
