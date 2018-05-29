@@ -34,6 +34,14 @@ class Plugin {
     add_filter('product_rewrite_rules', __CLASS__ . '::product_rewrite_rules', 100);
     add_filter('request', __CLASS__ . '::request', 1);
 
+    // Force WooCommerce to assume that the product permalink base path is
+    // identical to the path of the shop page and thus trigger the generation of
+    // rewrite rules necessary for special endpoints of child pages below the
+    // my-account page; e.g., orders, logout, etc.
+    // @see wc_fix_rewrite_rules()
+    add_filter('default_option_woocommerce_permalinks', __CLASS__ . '::option_woocommerce_permalinks');
+    add_filter('option_woocommerce_permalinks', __CLASS__ . '::option_woocommerce_permalinks');
+
     // Removes trailing slash from password reset and other links to avoid redirects.
     add_filter('woocommerce_get_endpoint_url', __CLASS__ . '::woocommerce_get_endpoint_url', 10, 4);
   }
@@ -86,6 +94,15 @@ class Plugin {
       }
     }
     return $query_vars;
+  }
+
+  /**
+   * @implements default_option_NAME
+   * @implements option_NAME
+   */
+  public static function option_woocommerce_permalinks($settings) {
+    $settings['use_verbose_page_rules'] = TRUE;
+    return $settings;
   }
 
   /**
