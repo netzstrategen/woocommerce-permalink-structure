@@ -67,10 +67,13 @@ class Plugin {
    */
   public static function request(array $query_vars) {
     if (isset($query_vars['product_cat']) && $query_vars['product_cat'] !== '' && !term_exists($query_vars['product_cat'], 'product_cat')) {
-      // If the requested path is a child of the shop page query the page instead of a category or product.
+      // If the requested path is a child page of the shop page then query that
+      // page instead of a category or product.
       $pagename = static::getCategoryBase() . '/' . ltrim($query_vars['product_cat_and_post_name'], '/');
-      if ($post = get_page_by_path($pagename)) {
-        return ['page_id' => $post->ID];
+      if (get_page_by_path($pagename)) {
+        // page_id would be much better for performance (avoiding another lookup
+        // by post_name), but WP_Query does not populate queried_object with it.
+        return ['pagename' => $pagename];
       }
       // The regular rewrite rule for products is:
       //   shop/(.+?)/([^/]+)(?:/([0-9]+))?/?$	index.php?product_cat=$matches[1]&product=$matches[2]&page=$matches[3]	product
