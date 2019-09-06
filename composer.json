@@ -1,0 +1,15 @@
+{
+    "name": "local-plugins/woocommerce-permalink-structure",
+    "type": "wordpress-plugin",
+    "authors": [
+        {
+            "name": "Netzstrategen",
+            "email": "hallo@netzstrategen.com",
+            "homepage": "https://netzstrategen.com"
+        }
+    ],
+    "require": {
+        "php": ">=7.0.0",
+        "composer/installers": "^1"
+    }
+}
