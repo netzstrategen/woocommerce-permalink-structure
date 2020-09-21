@@ -77,9 +77,9 @@ class Plugin {
     if (isset($query_vars['product_cat']) && $query_vars['product_cat'] !== '' && !term_exists($query_vars['product_cat'], 'product_cat')) {
       // If the requested path is a child page of the shop page then query that
       // page instead of a category or product.
-      $pagename = static::getCategoryBase() . '/';
+      $pagename = static::getCategoryBase();
       if (isset($query_vars['product_cat_and_post_name'])) {
-        $pagename .= ltrim($query_vars['product_cat_and_post_name'], '/');
+        $pagename .= '/' . ltrim($query_vars['product_cat_and_post_name'], '/');
       }
       if (get_page_by_path($pagename)) {
         // page_id would be much better for performance (avoiding another lookup
