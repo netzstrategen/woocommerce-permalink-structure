@@ -29,9 +29,9 @@ class Plugin {
    */
   public static function init() {
     add_filter('query_vars', __CLASS__ . '::query_vars');
-    // Add rewrite rules at the beginning of the product rules to not mistakenly
-    // match the product taxonomy ones which are defined upfront.
-    add_filter('product_rewrite_rules', __CLASS__ . '::product_rewrite_rules', 100);
+    // Add rewrite rules at the beginning of the product category rules to not
+    // mistakenly match the product taxonomy ones which are defined upfront.
+    add_filter('product_cat_rewrite_rules', __CLASS__ . '::product_rewrite_rules', 100);
     add_filter('request', __CLASS__ . '::request', 1);
 
     // Force WooCommerce to assume that the product permalink base path is
@@ -74,13 +74,13 @@ class Plugin {
    * @implements request
    */
   public static function request(array $query_vars) {
-    if (isset($query_vars['product_cat']) && $query_vars['product_cat'] !== '' && !term_exists($query_vars['product_cat'], 'product_cat')) {
+    if (isset($query_vars['product_cat_and_post_name']) && isset($query_vars['product_cat'])
+      && $query_vars['product_cat'] !== ''
+      && !term_exists($query_vars['product_cat'], 'product_cat')) {
       // If the requested path is a child page of the shop page then query that
       // page instead of a category or product.
       $pagename = static::getCategoryBase();
-      if (isset($query_vars['product_cat_and_post_name'])) {
-        $pagename .= '/' . ltrim($query_vars['product_cat_and_post_name'], '/');
-      }
+      $pagename .= '/' . ltrim($query_vars['product_cat_and_post_name'], '/');
       if (get_page_by_path($pagename)) {
         // page_id would be much better for performance (avoiding another lookup
         // by post_name), but WP_Query does not populate queried_object with it.
@@ -91,9 +91,7 @@ class Plugin {
       $query_vars['post_type'] = 'product';
       $query_vars['product'] = $query_vars['product_cat'];
       $query_vars['name'] = $query_vars['product'];
-      if (isset($query_vars['product_cat_and_post_name'])) {
-        $query_vars['product_cat'] = trim(strtr($query_vars['product_cat_and_post_name'], [$query_vars['product_cat'] => '']), '/');
-      }
+      $query_vars['product_cat'] = trim(strtr($query_vars['product_cat_and_post_name'], [$query_vars['product_cat'] => '']), '/');
 
       // Also rewrite the paging parameter from categories to posts/pages.
       if (isset($query_vars['paged'])) {
