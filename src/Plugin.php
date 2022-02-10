@@ -74,13 +74,32 @@ class Plugin {
    * @implements request
    */
   public static function request(array $query_vars) {
-    if (isset($query_vars['product_cat_and_post_name']) && isset($query_vars['product_cat'])
-      && $query_vars['product_cat'] !== ''
-      && !term_exists($query_vars['product_cat'], 'product_cat')) {
+    // If the shop page matches the product category base, then WooCommerce adds
+    // additional rewrite rules, to enforce the product archive listing on the
+    // shop page instead of the shop page content:
+    //   shop/?$    index.php?post_type=product    other
+    // Override this to show the shop page content.
+    if (isset($query_vars['post_type']) && $query_vars === ['post_type' => 'product']) {
+      // A shop page might be set but may not exist.
+      // is_shop() returns false in this early bootstrap phase.
+      if (($shop_page_id = wc_get_page_id('shop')) && ($shop_page = get_post($shop_page_id))) {
+        $shop_uri = get_permalink($shop_page_id);
+        $shop_slug = trim(str_replace(site_url(), '', $shop_uri), '/');
+        $is_shop_page = $shop_slug === $shop_page->post_name;
+        if ($is_shop_page) {
+          // page_id would be much better for performance (avoiding another lookup
+          // by post_name), but WP_Query does not populate queried_object with it.
+          return ['pagename' => $shop_page->post_name];
+        }
+      }
+    }
+    if (isset($query_vars['product_cat']) && $query_vars['product_cat'] !== '' && !term_exists($query_vars['product_cat'], 'product_cat')) {
       // If the requested path is a child page of the shop page then query that
       // page instead of a category or product.
       $pagename = static::getCategoryBase();
-      $pagename .= '/' . ltrim($query_vars['product_cat_and_post_name'], '/');
+      if (isset($query_vars['product_cat_and_post_name'])) {
+        $pagename .= '/' . ltrim($query_vars['product_cat_and_post_name'], '/');
+      }
       if (get_page_by_path($pagename)) {
         // page_id would be much better for performance (avoiding another lookup
         // by post_name), but WP_Query does not populate queried_object with it.
@@ -91,7 +110,9 @@ class Plugin {
       $query_vars['post_type'] = 'product';
       $query_vars['product'] = $query_vars['product_cat'];
       $query_vars['name'] = $query_vars['product'];
-      $query_vars['product_cat'] = trim(strtr($query_vars['product_cat_and_post_name'], [$query_vars['product_cat'] => '']), '/');
+      if (isset($query_vars['product_cat_and_post_name'])) {
+        $query_vars['product_cat'] = trim(strtr($query_vars['product_cat_and_post_name'], [$query_vars['product_cat'] => '']), '/');
+      }
 
       // Also rewrite the paging parameter from categories to posts/pages.
       if (isset($query_vars['paged'])) {
