@@ -29,9 +29,9 @@ class Plugin {
    */
   public static function init() {
     add_filter('query_vars', __CLASS__ . '::query_vars');
-    // Add rewrite rules at the beginning of the product rules to not mistakenly
-    // match the product taxonomy ones which are defined upfront.
-    add_filter('product_rewrite_rules', __CLASS__ . '::product_rewrite_rules', 100);
+    // Add rewrite rules at the beginning of the product category rules to not
+    // mistakenly match the product taxonomy ones which are defined upfront.
+    add_filter('product_cat_rewrite_rules', __CLASS__ . '::product_rewrite_rules', 100);
     add_filter('request', __CLASS__ . '::request', 1);
 
     // Force WooCommerce to assume that the product permalink base path is
@@ -74,6 +74,25 @@ class Plugin {
    * @implements request
    */
   public static function request(array $query_vars) {
+    // If the shop page matches the product category base, then WooCommerce adds
+    // additional rewrite rules, to enforce the product archive listing on the
+    // shop page instead of the shop page content:
+    //   shop/?$    index.php?post_type=product    other
+    // Override this to show the shop page content.
+    if (isset($query_vars['post_type']) && $query_vars === ['post_type' => 'product']) {
+      // A shop page might be set but may not exist.
+      // is_shop() returns false in this early bootstrap phase.
+      if (($shop_page_id = wc_get_page_id('shop')) && ($shop_page = get_post($shop_page_id))) {
+        $shop_uri = get_permalink($shop_page_id);
+        $shop_slug = trim(str_replace(site_url(), '', $shop_uri), '/');
+        $is_shop_page = $shop_slug === $shop_page->post_name;
+        if ($is_shop_page) {
+          // page_id would be much better for performance (avoiding another lookup
+          // by post_name), but WP_Query does not populate queried_object with it.
+          return ['pagename' => $shop_page->post_name];
+        }
+      }
+    }
     if (isset($query_vars['product_cat']) && $query_vars['product_cat'] !== '' && !term_exists($query_vars['product_cat'], 'product_cat')) {
       // If the requested path is a child page of the shop page then query that
       // page instead of a category or product.
