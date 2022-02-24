@@ -22,3 +22,11 @@ Adjusts internal WordPress rewrite rule structure; not necessarily compatible wi
 = Requirements =
 
 * PHP 7.0 or later.
+
+= Configuration =
+
+To only show the Shop page content on the WooCommerce Shop page without the
+regular product listing, set a constant in `wp-config.php`:
+```
+const WOOCOMMERCE_PERMALINK_STRUCTURE_SHOP_PAGE_CONTENT_ONLY = TRUE;
+```

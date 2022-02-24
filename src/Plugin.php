@@ -78,8 +78,9 @@ class Plugin {
     // additional rewrite rules, to enforce the product archive listing on the
     // shop page instead of the shop page content:
     //   shop/?$    index.php?post_type=product    other
-    // Override this to show the shop page content.
-    if (isset($query_vars['post_type']) && $query_vars === ['post_type' => 'product']) {
+    // Override this to only show the shop page content, if configured.
+    if (defined('WOOCOMMERCE_PERMALINK_STRUCTURE_SHOP_PAGE_CONTENT_ONLY') && WOOCOMMERCE_PERMALINK_STRUCTURE_SHOP_PAGE_CONTENT_ONLY
+        && isset($query_vars['post_type']) && $query_vars === ['post_type' => 'product']) {
       // A shop page might be set but may not exist.
       // is_shop() returns false in this early bootstrap phase.
       if (($shop_page_id = wc_get_page_id('shop')) && ($shop_page = get_post($shop_page_id))) {
