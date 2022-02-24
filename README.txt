@@ -2,8 +2,8 @@
 Contributors: netzstrategen
 Tags: permalink, woocommerce
 Requires at least: 4.5
-Tested up to: 4.9.8
-Stable tag: 1.1.3
+Tested up to: 5.9.1
+Stable tag: 1.2.1
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -22,3 +22,11 @@ Adjusts internal WordPress rewrite rule structure; not necessarily compatible wi
 = Requirements =
 
 * PHP 7.0 or later.
+
+= Configuration =
+
+To only show the Shop page content on the WooCommerce Shop page without the
+regular product listing, set a constant in `wp-config.php`:
+```
+const WOOCOMMERCE_PERMALINK_STRUCTURE_SHOP_PAGE_CONTENT_ONLY = TRUE;
+```
